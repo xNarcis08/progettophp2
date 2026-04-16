@@ -21,12 +21,17 @@ if(!isset($_SESSION["id_utente"])){
 				window.open("anagrafica.php?azione=elimina&id="+id, "_top");
 			}
 		}
+		function recupera(id){
+			if(confirm("Vuoi recuperare il cliente selezionato ?")){
+				window.open("anagrafica.php?azione=recupera&id="+id, "_top");
+			}
+		}
 	</script>
 	
 </head>
 <body>
 	<?php
-	$azione = $_GET["azione"];
+	$azione = $_GET['azione'] ?? '';
 	//echo "azione: " . $azione . "<br>";
 	
 	if($azione == "insertok"){
@@ -44,7 +49,7 @@ if(!isset($_SESSION["id_utente"])){
 			?>
 			<h1>Anagrafica - Tot. <?php echo $totale ?> 
 				<a href="anagrafica.php?azione=nuovo"><img src="images/add.png" width="20px" height="auto"></a> 
-				<img src="images/bin.png" width="20px" height="auto">
+				<a href="anagrafica.php?azione=cestino"><img src="images/bin.png" width="20px" height="auto"></a>
 			</h1>
 			<table>
 				<thead>
@@ -361,12 +366,105 @@ if(!isset($_SESSION["id_utente"])){
 		exit;
 		$azione = "";
 	}
+	// nuova funzione cestino
+	if($azione == "cestino"){
+	?>
+		<center>
+			<?php
+				$select="select * from anagrafica where attivo = 0 and canc = 1";
+				$result = mysqli_query($conn, $select); 
+				$totale = mysqli_num_rows($result)
+			?>
+			<h1>Cestino - Tot. <?php echo $totale ?> 
+				<img src="images/bin.png" width="20px" height="auto">
+			</h1>
+			<table>
+				<thead>
+					<tr style="background-color: brown; color: white;">
+						<th> ID </th>
+						<th> Nome </th>
+						<th> Cognome </th>
+						<th> Sesso </th>
+						<th> Data di Nascita </th>
+						<th> Indirizzo </th>
+						<th> CAP </th>
+						<th> Citta </th>
+						<th> Provincia </th>
+						<th> Telefono </th>
+						<th> Cellulare </th>
+						<th> Email </th>
+						<th style="background-color: blue">  Azioni &nbsp;  </th>
+					</tr>
+				</thead>
+				<?php
+				while($query = mysqli_fetch_array($result))
+				{
+					$id = $query["id"];
+					$nome = $query["nome"];
+					$cognome = $query["cognome"];
+					$sesso = $query["sesso"];
+					$datadinascita = $query["data_nascita"];
+					
+					$anno_nascita = substr($datadinascita,0,4);
+					$mese_nascita = substr($datadinascita,5,2);
+					$giorno_nascita = substr($datadinascita,8,2);
+					$datadinascita = $giorno_nascita . "-" . $mese_nascita . "-" . $anno_nascita;
+					
+					$indirizzo = $query["indirizzo"];
+					$cap = $query["cap"];
+					$citta = $query["citta"];
+					$provincia = $query["provincia"];
+					$telefono = $query["telefono"];
+					$cellulare = $query["cellulare"];
+					$email = $query["email"];
+				?>
+				<tbody>
+					<tr style="height: 22px">
+						<td> <?php echo $id ?> </td>
+						<td> <?php echo $nome ?> </td>
+						<td> <?php echo $cognome ?> </td>
+						<td> <?php echo $sesso ?> </td>
+						<td> <?php echo $datadinascita ?> </td>
+						<td> <a href="https://www.google.com/maps/place/<?php echo $indirizzo ?>,+<?php echo $cap ?>+<?php echo $citta ?>+<?php echo $provincia ?>/@44.6780158,11.0407445,17z/data=!4m6!3m5!1s0x477fe9ed09ed96f5:0x951b40fdcfed0d8b!8m2!3d44.678279!4d11.040825!16s%2Fg%2F11csd90q1r?entry=ttu&g_ep=EgoyMDI2MDQwMS4wIKXMDSoASAFQAw%3D%3D" target="_blank"> <?php echo $indirizzo ?> </a> </td>
+						<td> <?php echo $cap ?> </td>
+						<td> <?php echo $citta ?> </td>
+						<td> <?php echo $provincia ?> </td>
+						<td> <a href="tel:<?php echo $telefono ?>"><?php echo $telefono ?></a> </td>
+						<td> <a href="https://wa.me/<?php echo $cellulare ?>?text=buongiorno sono narcis."><?php echo $cellulare ?></a> </td>
+						<td> <a href="mailto:<?php echo $email ?>?subject=ordine num 3246&message=buongiorno, "><?php echo $email ?></a> </td>
+						<td>
+							<img src="images/recover.png" width="20px" height="auto" title="Recupera Cliente" alt="Recupera Cliente" onClick="recupera(<?php echo $id ?>);" style="cursor: pointer">
+						</td>
+					</tr>
+				</tbody>
+				<?php
+				}
+				?>
+			</table>
+			<br>
+			<button onclick="window.location.href='anagrafica.php'">Torna all'anagrafica</button>
+		</center>
+	<?php
+	}
+	// recupera cliente canc = 0 attivo 1 -> menu principale
+	if($azione == "recupera"){
+		$id = $_GET["id"];
+		
+		$update = "UPDATE `anagrafica` SET canc = 0, attivo = 1 WHERE id = " . $id;
+		echo $update;
+		mysqli_query($conn, $update);
+		
+		header("Location: http://localhost/php2/anagrafica.php?azione=cestino");
+		exit;
+	}
+	// aggiunto attivo = 0
+	
 	if($azione == "elimina"){
 		$id = $_GET["id"];
 		
-		$delete = "UPDATE `anagrafica` SET canc = 1 WHERE id = " . $id;
+		$delete = "UPDATE `anagrafica` SET canc = 1, attivo = 0 WHERE id = " . $id;
 		echo $delete;
-		mysqli_query($conn, $delete);
+		mysqli_query($conn, $delete);	
 		
 		header("Location: http://localhost/php2/anagrafica.php");
 		exit;
