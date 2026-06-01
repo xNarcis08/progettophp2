@@ -1,4 +1,9 @@
 <?php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
+require_once("PHPMailer/vendor/autoload.php");
+
 include("dbconf.php");
 session_start();
 
@@ -8,24 +13,64 @@ if(!isset($_SESSION["id_utente"])){
 }
 
 $messaggio_conferma = "";
-
 if(isset($_POST['invia'])){
-    $nome = $_POST['nome'];
-    $cognome = $_POST['cognome'];
-    $email = $_POST['email'];
-    $messaggio = $_POST['messaggio'];
-    $privacy = isset($_POST['privacy']) ? 1 : 0;
+    $nome = $_POST['nome']; $cognome = $_POST['cognome']; $email = $_POST['email'];
+    $messaggio = $_POST['messaggio']; $privacy = isset($_POST['privacy']) ? 1 : 0;
     
-    $file_name = $_FILES['file']['name'];
-
+	$target_dir = "uploads/";
+	
+	$file_name = $_FILES['file']['name'];
+	
+	$target_file = $target_dir . basename($_FILES['file']['name']);
+	
+	if(move_uploaded_file($_FILES['file']['tmp_name'],$target_file)){
+		$messaggio_conferma =  "il file " . $target_file . " e' stato caricato con successo";
+	}
+	else{
+		$messaggio_conferma =  "spiacente, si è verificato un errore nel caricamento";
+	}
+	
     $sql = "INSERT INTO contatti (nome, cognome, email, messaggio, file, privacy) 
-            VALUES ('$nome', '$cognome', '$email', '$messaggio', '$file_name', '$privacy')";
+            VALUES ('$nome', '$cognome', '$email', '$messaggio', '$target_file', '$privacy')";
+    if(mysqli_query($conn, $sql)){ $messaggio_conferma = "Messaggio inviato con successo!"; }
+    else { $messaggio_conferma = "Errore nell'invio: " . mysqli_error($conn); }
+	
+	//inviamo una mail con PHPMailer mail: narcis08691@proton.me pass: Parola123$$$$
+	
+	$mail = new PHPMailer(true); //istanza di una classe
+	
+	try{
+		$mail->isSMTP();		//Send Mail Trasfer Protocol
+		$mail->SMTPDebug = 2;		//0 disable 1 enable 2 dettagli+
+		$mail->Host = "mail.brigazzifabio.it"; //smtp.protonmail.ch
+		$mail->SMTPAuth = true;
+		$mail->Username = "info@brigazzifabio.it";	//email
+		$mail->Password = "$Br1g4zz1!2023@#";	//password email
+		//$mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+		$mail->SMTPSecure = 'tls';
+		$mail->Port = 587;		//465 o 587 -> ssl o tls
 
-    if(mysqli_query($conn, $sql)){
-        $messaggio_conferma = "Messaggio inviato con successo!";
-    } else {
-        $messaggio_conferma = "Errore nell'invio: " . mysqli_error($conn);
-    }
+		$mail->setFrom('info@brigazzifabio.it', 'brigazzi fabio');
+		$mail->addAddress($email,$cognome . " " . $nome);
+
+		$mail->isHTML(true);
+		$mail->Subject = "Richiesta di Contatto";
+		$mail->Body = $messaggio;
+		$mail->AltBody = $messaggio;
+		
+		if(!empty($file_name)){
+			$mail->addAttachment($target_file);
+		}
+		
+		
+
+		$mail->send();
+		$messaggio_conferma = "Messaggio mail inviato con successo!";
+	}
+	catch(Exception $e){
+		$messaggio_conferma = "errore invio mail: " . $mail->ErrorInfo;
+	}
+	
 }
 ?>
 <!DOCTYPE html>
@@ -33,148 +78,29 @@ if(isset($_POST['invia'])){
 <head>
     <meta charset="utf-8">
     <title>Contatti</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: #333;
-            padding: 20px;
-        }
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 450px;
-        }
-        h1 {
-            margin-top: 0;
-            color: #2d3436;
-            font-size: 28px;
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: bold;
-            color: #2d3436;
-            font-size: 14px;
-        }
-        input[type="text"],
-        input[type="email"],
-        input[type="file"],
-        textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #dfe6e9;
-            border-radius: 10px;
-            box-sizing: border-box;
-            font-family: inherit;
-            font-size: 14px;
-        }
-        textarea {
-            height: 100px;
-            resize: vertical;
-        }
-        .checkbox-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 20px 0;
-            font-size: 13px;
-        }
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 12px;
-            background-color: #B7F102;
-            color: #2d3436;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            filter: brightness(1.05);
-        }
-        .btn-back {
-            background-color: #6c757d;
-            color: white;
-            margin-top: 15px;
-        }
-        .status-msg {
-            padding: 12px;
-            border-radius: 10px;
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        .status-success { background-color: #d4edda; color: #155724; }
-        .status-error { background-color: #f8d7da; color: #721c24; }
-    </style>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="card">
     <h1>Contatti</h1>
-
     <?php if($messaggio_conferma != ""): ?>
         <div class="status-msg <?php echo strpos($messaggio_conferma, 'successo') !== false ? 'status-success' : 'status-error'; ?>">
             <?php echo $messaggio_conferma; ?>
         </div>
     <?php endif; ?>
-
     <form method="POST" action="contatti.php" enctype="multipart/form-data">
-        <div class="form-group">
-            <label>Nome *</label>
-            <input type="text" name="nome" required>
-        </div>
-
-        <div class="form-group">
-            <label>Cognome *</label>
-            <input type="text" name="cognome" required>
-        </div>
-
-        <div class="form-group">
-            <label>Email *</label>
-            <input type="email" name="email" required>
-        </div>
-
-        <div class="form-group">
-            <label>Carica File</label>
-            <input type="file" name="file">
-        </div>
-
-        <div class="form-group">
-            <label>Messaggio *</label>
-            <textarea name="messaggio" required></textarea>
-        </div>
-
-        <div class="checkbox-group">
+        <div class="form-group"><label>Nome *</label><input type="text" name="nome" required></div>
+        <div class="form-group"><label>Cognome *</label><input type="text" name="cognome" required></div>
+        <div class="form-group"><label>Email *</label><input type="email" name="email" required></div>
+        <div class="form-group"><label>Carica File</label><input type="file" name="file"></div>
+        <div class="form-group"><label>Messaggio *</label><textarea name="messaggio" required></textarea></div>
+        <div style="display: flex; align-items: center; gap: 10px; margin: 20px 0; font-size: 13px; text-align: left;">
             <input type="checkbox" name="privacy" id="privacy" required>
-            <label for="privacy">Accetto la privacy *</label>
+            <label for="privacy" style="margin-bottom: 0; font-weight: normal;">Accetto la privacy *</label>
         </div>
-
         <button type="submit" name="invia" class="btn">Invia Messaggio</button>
     </form>
-
-    <a href="pannellocontrollo.php" class="btn btn-back">Torna al Menu</a>
+    <a href="pannellocontrollo.php" class="btn btn-back">Torna al MENU</a>
 </div>
-
 </body>
 </html>
