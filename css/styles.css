@@ -1,0 +1,185 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    color: #333;
+}
+
+.container, .card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 500px;
+    text-align: center;
+    margin: 20px auto;
+}
+
+.container-wide {
+    max-width: 1200px;
+    display: block; 
+}
+
+h1, h2 {
+    color: #2d3436;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+
+.form-group {
+    margin-bottom: 15px;
+    text-align: left;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2d3436;
+    font-size: 14px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="tel"],
+input[type="date"],
+textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 5px 0;
+    border: 1px solid #dfe6e9;
+    border-radius: 10px;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: #B7F102;
+    box-shadow: 0 0 0 3px rgba(183, 241, 2, 0.2);
+}
+
+/* Bottoni */
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background-color: #B7F102;
+    color: #2d3436;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 4px 6px rgba(183, 241, 2, 0.2);
+    margin-top: 10px;
+    text-align: center;
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 7px 14px rgba(183, 241, 2, 0.4);
+    filter: brightness(1.05);
+}
+
+.btn-back {
+    background-color: #6c757d;
+    color: white;
+}
+
+.btn-exit {
+    background-color: #ff7675;
+    color: white;
+}
+
+.btn-save {
+    background-color: #2ecc71;
+    color: white;
+}
+
+/* Tabelle */
+.table-container {
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+th {
+    background-color: #2d3436;
+    color: white;
+    padding: 12px;
+    text-align: left;
+    font-size: 14px;
+}
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+    text-align: left;
+}
+
+tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Messaggi di stato */
+.status-msg {
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.status-success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Icone */
+.icon-btn {
+    cursor: pointer;
+    transition: transform 0.2s;
+    vertical-align: middle;
+}
+
+.icon-btn:hover {
+    transform: scale(1.2);
+}
+
+.welcome-text {
+    color: #636e72;
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+.btn-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
